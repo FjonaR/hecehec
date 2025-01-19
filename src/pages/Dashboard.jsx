@@ -2,10 +2,11 @@ import React from 'react';
 import {
   AppBar,
   Toolbar,
-  IconButton,
   Typography,
   Avatar,
   Button,
+  Container,
+  Box,
 } from '@mui/material';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase.js';
@@ -19,7 +20,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar>
           <Typography variant="h6" style={{ flexGrow: 1 }}>
             Dashboard
@@ -34,9 +35,18 @@ const Dashboard = () => {
           )}
         </Toolbar>
       </AppBar>
-      <div style={{ padding: '20px' }}>
-        <Typography variant="h4">Hello, {user?.displayName}</Typography>
-      </div>
+      <Toolbar /> {/* This is to offset the content below the AppBar */}
+      <Container maxWidth="lg" style={{ marginTop: '20px' }}>
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="80vh"
+          width="100%"
+        >
+          <Typography variant="h4">Hello, {user?.displayName}</Typography>
+        </Box>
+      </Container>
     </>
   );
 };
