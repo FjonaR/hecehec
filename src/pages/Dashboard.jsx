@@ -12,6 +12,24 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase.js';
+import ChallengeCard from '../components/ChallengeCard';
+
+const challenges = [
+  {
+    name: `Let's walk to Hamburg from Berlin`,
+    start: 'Berlin',
+    end: 'Hamburg',
+    distance: 289000,
+    walkedDistance: 50000,
+  },
+  {
+    name: 'Walk around the equator',
+    start: 'Quito',
+    end: 'Quito',
+    distance: 40075000,
+    walkedDistance: 15000000,
+  },
+];
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
@@ -23,6 +41,10 @@ const Dashboard = () => {
 
   const handleAvatarClick = () => {
     navigate('/profile');
+  };
+
+  const handleAcceptChallenge = () => {
+    console.log('Challenge accepted!');
   };
 
   return (
@@ -59,8 +81,19 @@ const Dashboard = () => {
           alignItems="center"
           height="80vh"
           width="100%"
+          flexDirection="row"
         >
-          <Typography variant="h4">Hello, {user?.displayName}</Typography>
+          {challenges.map((challenge, index) => (
+            <ChallengeCard
+              key={index}
+              title={challenge.name}
+              start={challenge.start}
+              end={challenge.end}
+              distance={challenge.distance}
+              walkedDistance={challenge.walkedDistance}
+              onAccept={handleAcceptChallenge}
+            />
+          ))}
         </Box>
       </Container>
     </>
