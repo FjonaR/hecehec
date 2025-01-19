@@ -9,6 +9,8 @@ import {
 import { auth } from './services/firebase.js';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Profile from './pages/Profile';
+import PrivateRoute from './components/PrivateRoute';
 import './App.css';
 
 const darkTheme = createTheme({
@@ -26,16 +28,28 @@ function App() {
       <Router basename="/hecehec">
         <Routes>
           <Route
+            path="/"
+            element={<Navigate to={user ? '/dashboard' : '/login'} />}
+          />
+          <Route
             path="/login"
             element={user ? <Navigate to={'/'} /> : <Login />}
           />
           <Route
             path="/dashboard"
-            element={user ? <Dashboard /> : <Navigate to="/login" />}
+            element={
+              <PrivateRoute>
+                <Dashboard />
+              </PrivateRoute>
+            }
           />
           <Route
-            path="/"
-            element={<Navigate to={user ? '/dashboard' : '/login'} />}
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
+              </PrivateRoute>
+            }
           />
         </Routes>
       </Router>

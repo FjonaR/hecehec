@@ -10,13 +10,19 @@ import {
 } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase.js';
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     auth.signOut();
+  };
+
+  const handleAvatarClick = () => {
+    navigate('/profile');
   };
 
   return (
@@ -32,6 +38,7 @@ const Dashboard = () => {
                 alt={user.displayName}
                 src={user.photoURL}
                 style={{ marginRight: '10px' }}
+                onClick={handleAvatarClick}
               />
               <Button
                 color="inherit"
