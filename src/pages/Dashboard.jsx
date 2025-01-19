@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -11,37 +11,36 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../services/firebase.js';
+import { auth, db } from '../services/firebase.js';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  serverTimestamp,
+} from 'firebase/firestore';
 import ChallengeCard from '../components/ChallengeCard';
 import CreateChallengeCard from '../components/CreateChallengeCard';
-
-const initialChallenges = [
-  {
-    name: `Let's walk to Hamburg from Berlin`,
-    start: 'Berlin',
-    end: 'Hamburg',
-    distance: 289000,
-    walkedDistance: 50000,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    deletedAt: null,
-  },
-  {
-    name: 'Walk around the equator',
-    start: 'Quito',
-    end: 'Quito',
-    distance: 40075000,
-    walkedDistance: 15000000,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    deletedAt: null,
-  },
-];
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
-  const [challenges, setChallenges] = useState(initialChallenges);
+  const [challenges, setChallenges] = useState([]);
+
+  useEffect(() => {
+    const fetchChallenges = async () => {
+      const querySnapshot = await getDocs(collection(db, 'challenges'));
+      const challengesData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        createdAt: doc.data().createdAt.toDate(),
+        updatedAt: doc.data().updatedAt.toDate(),
+        deletedAt: doc.data().deletedAt?.toDate(),
+      }));
+      setChallenges(challengesData);
+    };
+
+    fetchChallenges();
+  }, []);
 
   const handleLogout = () => {
     auth.signOut();
@@ -51,15 +50,18 @@ const Dashboard = () => {
     navigate('/profile');
   };
 
-  const handleAcceptChallenge = () => {
-    console.log('Challenge accepted!');
-  };
-
-  const handleCreateChallenge = (newChallenge) => {
-    const timestamp = new Date().toISOString();
+  const handleCreateChallenge = async (newChallenge) => {
+    const timestamp = serverTimestamp();
+    const docRef = await addDoc(collection(db, 'challenges'), {
+      ...newChallenge,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      deletedAt: null,
+    });
     setChallenges((prev) => [
       ...prev,
       {
+        id: docRef.id,
         ...newChallenge,
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -105,9 +107,9 @@ const Dashboard = () => {
           gap={'16px'}
         >
           <CreateChallengeCard onCreate={handleCreateChallenge} />
-          {challenges.map((challenge, index) => (
+          {challenges.map((challenge) => (
             <ChallengeCard
-              key={index}
+              key={challenge.id}
               title={challenge.name}
               start={challenge.start}
               end={challenge.end}
