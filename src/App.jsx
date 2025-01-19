@@ -1,13 +1,14 @@
-import { signInWithPopup } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Button,
-  Typography,
-} from '@mui/material';
-import { db, auth, googleProvider } from './services/firebase.js';
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from 'react-router-dom';
+import { auth } from './services/firebase.js';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 import './App.css';
 
 const darkTheme = createTheme({
@@ -19,45 +20,25 @@ const darkTheme = createTheme({
 function App() {
   const [user] = useAuthState(auth);
 
-  const signInWithGoogle = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error('Error signing in with Google:', error);
-    }
-  };
-
-  const handleLogout = () => {
-    auth.signOut();
-  };
-
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <div style={{ padding: '20px' }}>
-        {user ? (
-          <>
-            <Typography variant="h4">Hello, {user?.displayName}</Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleLogout}
-              style={{ marginTop: '10px' }}
-            >
-              Log out
-            </Button>
-          </>
-        ) : (
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={signInWithGoogle}
-            style={{ marginTop: '10px' }}
-          >
-            Sign In with Google
-          </Button>
-        )}
-      </div>
+      <Router basename="/hecehec">
+        <Routes>
+          <Route
+            path="/login"
+            element={user ? <Navigate to={'/'} /> : <Login />}
+          />
+          <Route
+            path="/dashboard"
+            element={user ? <Dashboard /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/"
+            element={<Navigate to={user ? '/dashboard' : '/login'} />}
+          />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
