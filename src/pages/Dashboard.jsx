@@ -8,6 +8,7 @@ import {
   Container,
   Box,
 } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase.js';
 
@@ -27,8 +28,16 @@ const Dashboard = () => {
           </Typography>
           {user && (
             <>
-              <Avatar alt={user.displayName} src={user.photoURL} />
-              <Button color="inherit" onClick={handleLogout}>
+              <Avatar
+                alt={user.displayName}
+                src={user.photoURL}
+                style={{ marginRight: '10px' }}
+              />
+              <Button
+                color="inherit"
+                onClick={handleLogout}
+                startIcon={<LogoutIcon />}
+              >
                 Log out
               </Button>
             </>
