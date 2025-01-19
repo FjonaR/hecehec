@@ -1,37 +1,64 @@
-import { useState } from 'react';
-
-import reactLogo from './assets/react.svg';
-import { db, auth } from './services/firebase.js';
-
-import viteLogo from '/vite.svg';
+import { signInWithPopup } from 'firebase/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import {
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  Button,
+  Typography,
+} from '@mui/material';
+import { db, auth, googleProvider } from './services/firebase.js';
 import './App.css';
 
+const darkTheme = createTheme({
+  palette: {
+    mode: 'dark',
+  },
+});
+
 function App() {
-  const [count, setCount] = useState(0);
+  const [user] = useAuthState(auth);
+
+  const signInWithGoogle = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error('Error signing in with Google:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    auth.signOut();
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <div style={{ padding: '20px' }}>
+        {user ? (
+          <>
+            <Typography variant="h4">Hello, {user?.displayName}</Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleLogout}
+              style={{ marginTop: '10px' }}
+            >
+              Log out
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={signInWithGoogle}
+            style={{ marginTop: '10px' }}
+          >
+            Sign In with Google
+          </Button>
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </ThemeProvider>
   );
 }
 
