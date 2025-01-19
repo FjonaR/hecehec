@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -15,13 +15,16 @@ import { auth } from '../services/firebase.js';
 import ChallengeCard from '../components/ChallengeCard';
 import CreateChallengeCard from '../components/CreateChallengeCard';
 
-const _challenges = [
+const initialChallenges = [
   {
     name: `Let's walk to Hamburg from Berlin`,
     start: 'Berlin',
     end: 'Hamburg',
     distance: 289000,
     walkedDistance: 50000,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    deletedAt: null,
   },
   {
     name: 'Walk around the equator',
@@ -29,14 +32,16 @@ const _challenges = [
     end: 'Quito',
     distance: 40075000,
     walkedDistance: 15000000,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    deletedAt: null,
   },
 ];
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
-
-  const [challenges, setChallenges] = React.useState(_challenges);
+  const [challenges, setChallenges] = useState(initialChallenges);
 
   const handleLogout = () => {
     auth.signOut();
@@ -51,7 +56,16 @@ const Dashboard = () => {
   };
 
   const handleCreateChallenge = (newChallenge) => {
-    setChallenges([...challenges, newChallenge]);
+    const timestamp = new Date().toISOString();
+    setChallenges((prev) => [
+      ...prev,
+      {
+        ...newChallenge,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        deletedAt: null,
+      },
+    ]);
   };
 
   return (
@@ -99,7 +113,8 @@ const Dashboard = () => {
               end={challenge.end}
               distance={challenge.distance}
               walkedDistance={challenge.walkedDistance}
-              onAccept={handleAcceptChallenge}
+              createdAt={challenge.createdAt}
+              updatedAt={challenge.updatedAt}
             />
           ))}
         </Box>
