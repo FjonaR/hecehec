@@ -21,19 +21,38 @@ const initialChallenge = {
 const CreateChallengeCard = ({ onCreate }) => {
   const [open, setOpen] = useState(false);
   const [challenge, setChallenge] = useState(initialChallenge);
+  const [errors, setErrors] = useState({});
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setErrors({});
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setChallenge((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validate = () => {
+    const newErrors = {};
+    if (!challenge.name) newErrors.name = 'Name is required';
+    if (!challenge.start) newErrors.start = 'Start location is required';
+    if (!challenge.end) newErrors.end = 'End location is required';
+    if (!challenge.distance || challenge.distance <= 0)
+      newErrors.distance = 'Distance must be a positive number';
+    return newErrors;
+  };
+
   const handleSubmit = () => {
-    onCreate(challenge);
-    setChallenge(initialChallenge);
-    handleClose();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+    } else {
+      onCreate(challenge);
+      setChallenge(initialChallenge);
+      handleClose();
+    }
   };
 
   return (
@@ -80,6 +99,8 @@ const CreateChallengeCard = ({ onCreate }) => {
             margin="normal"
             value={challenge.name}
             onChange={handleChange}
+            error={!!errors.name}
+            helperText={errors.name}
           />
           <TextField
             label="Start"
@@ -88,6 +109,8 @@ const CreateChallengeCard = ({ onCreate }) => {
             margin="normal"
             value={challenge.start}
             onChange={handleChange}
+            error={!!errors.start}
+            helperText={errors.start}
           />
           <TextField
             label="End"
@@ -96,6 +119,8 @@ const CreateChallengeCard = ({ onCreate }) => {
             margin="normal"
             value={challenge.end}
             onChange={handleChange}
+            error={!!errors.end}
+            helperText={errors.end}
           />
           <TextField
             label="Distance (meters)"
@@ -105,6 +130,8 @@ const CreateChallengeCard = ({ onCreate }) => {
             margin="normal"
             value={challenge.distance}
             onChange={handleChange}
+            error={!!errors.distance}
+            helperText={errors.distance}
           />
           <Button
             variant="contained"
