@@ -1,11 +1,12 @@
 {
   "name": "hecehec",
+  "homepage": "https://fjonar.github.io/hecehec/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build --base=./",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write ./src",
