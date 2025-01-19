@@ -61,7 +61,7 @@ const CreateChallengeCard = ({ onCreate }) => {
         style={{
           margin: '20px',
           width: '400px',
-          height: '200px',
+          height: '250px',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
