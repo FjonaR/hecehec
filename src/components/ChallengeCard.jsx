@@ -7,7 +7,7 @@ const ChallengeCard = ({ title, start, end, distance, walkedDistance }) => {
   const leftDistance = (distance - walkedDistance) / KM_TO_M;
 
   return (
-    <Card style={{ margin: '20px', width: '400px' }}>
+    <Card style={{ margin: '20px', width: '400px', height: '200px' }}>
       <CardContent>
         <Typography variant="h5" component="div">
           {title}

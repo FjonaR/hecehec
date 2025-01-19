@@ -13,8 +13,9 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase.js';
 import ChallengeCard from '../components/ChallengeCard';
+import CreateChallengeCard from '../components/CreateChallengeCard';
 
-const challenges = [
+const _challenges = [
   {
     name: `Let's walk to Hamburg from Berlin`,
     start: 'Berlin',
@@ -35,6 +36,8 @@ const Dashboard = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
+  const [challenges, setChallenges] = React.useState(_challenges);
+
   const handleLogout = () => {
     auth.signOut();
   };
@@ -45,6 +48,10 @@ const Dashboard = () => {
 
   const handleAcceptChallenge = () => {
     console.log('Challenge accepted!');
+  };
+
+  const handleCreateChallenge = (newChallenge) => {
+    setChallenges([...challenges, newChallenge]);
   };
 
   return (
@@ -77,12 +84,13 @@ const Dashboard = () => {
       <Container maxWidth="lg" style={{ marginTop: '20px' }}>
         <Box
           display="flex"
-          justifyContent="center"
-          alignItems="center"
           height="80vh"
           width="100%"
           flexDirection="row"
+          flexWrap="wrap"
+          gap={'16px'}
         >
+          <CreateChallengeCard onCreate={handleCreateChallenge} />
           {challenges.map((challenge, index) => (
             <ChallengeCard
               key={index}
