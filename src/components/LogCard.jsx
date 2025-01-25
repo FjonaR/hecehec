@@ -9,12 +9,14 @@ const LogCard = ({ log, onRemove }) => {
   return (
     <Card style={{ margin: '20px', width: '400px', position: 'relative' }}>
       <CardContent>
-        <IconButton
-          style={{ position: 'absolute', top: '10px', right: '10px' }}
-          onClick={() => onRemove(log.id)}
-        >
-          <DeleteIcon />
-        </IconButton>
+        {onRemove && (
+          <IconButton
+            style={{ position: 'absolute', top: '10px', right: '10px' }}
+            onClick={() => onRemove(log.id)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        )}
         <Typography variant="body2" color="text.secondary">
           Distance: {log.distance} meters
         </Typography>

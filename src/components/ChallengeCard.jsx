@@ -77,34 +77,46 @@ const ChallengeCard = ({
       >
         <CardContent>
           <Box
-            sx={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-            }}
+            display="flex"
+            alignItems="flex-start"
+            justifyContent="space-between"
           >
-            {user && (
-              <Tooltip title={user.name}>
-                <Avatar alt={user.name} src={user.picture} />
-              </Tooltip>
-            )}
-            {leftDistance <= 0 ? (
-              <Typography variant="h4">🎉</Typography>
-            ) : (
-              <Typography variant="h4">🚶</Typography>
-            )}
-            {currentUser?.uid === user?.id && (
-              <IconButton onClick={handleOpenDialog}>
-                <DeleteIcon />
-              </IconButton>
-            )}
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '10px',
+                marginBottom: '10px',
+              }}
+            >
+              {user && (
+                <Tooltip title={user.name}>
+                  <Avatar alt={user.name} src={user.picture} />
+                </Tooltip>
+              )}
+              <Typography variant="h5" component="div">
+                {title}
+              </Typography>
+              {leftDistance <= 0 ? (
+                <Typography variant="h4">🎉</Typography>
+              ) : (
+                <Typography variant="h4">🚶</Typography>
+              )}
+            </Box>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              }}
+            >
+              {currentUser?.uid === user?.id && (
+                <IconButton onClick={handleOpenDialog}>
+                  <DeleteIcon />
+                </IconButton>
+              )}
+            </Box>
           </Box>
-          <Typography variant="h5" component="div">
-            {title}
-          </Typography>
           <Typography variant="body2" color="text.secondary">
             Distance: {formatDistance(distance)}
           </Typography>
