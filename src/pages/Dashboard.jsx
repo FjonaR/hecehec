@@ -1,46 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import LogoutIcon from '@mui/icons-material/Logout';
 import {
   AppBar,
-  Toolbar,
-  Typography,
   Avatar,
+  Box,
   Button,
   Container,
-  Box,
+  Toolbar,
+  Typography,
 } from '@mui/material';
-import LogoutIcon from '@mui/icons-material/Logout';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+} from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../services/firebase.js';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  serverTimestamp,
-} from 'firebase/firestore';
 import ChallengeCard from '../components/ChallengeCard';
 import CreateChallengeCard from '../components/CreateChallengeCard';
+import { auth, db } from '../services/firebase.js';
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
   const [challenges, setChallenges] = useState([]);
+  const [distancePreference, setDistancePreference] = useState('meters');
 
   useEffect(() => {
     const fetchChallenges = async () => {
       const querySnapshot = await getDocs(collection(db, 'challenges'));
-      const challengesData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate(),
-        updatedAt: doc.data().updatedAt.toDate(),
-        deletedAt: doc.data().deletedAt?.toDate(),
-      }));
+      const challengesData = querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        const walkedDistance =
+          data.logs?.reduce((sum, log) => sum + Number(log.distance), 0) || 0;
+        return {
+          id: doc.id,
+          ...data,
+          walkedDistance,
+          createdAt: data.createdAt.toDate(),
+          deletedAt: data.deletedAt?.toDate(),
+        };
+      });
       setChallenges(challengesData);
     };
 
     fetchChallenges();
   }, []);
+
+  useEffect(() => {
+    const fetchUserPreference = async () => {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        setDistancePreference(userSnap.data().distancePreference || 'meters');
+      }
+    };
+
+    if (user) {
+      fetchUserPreference();
+    }
+  }, [user]);
 
   const handleLogout = () => {
     auth.signOut();
@@ -51,11 +73,10 @@ const Dashboard = () => {
   };
 
   const handleCreateChallenge = async (newChallenge) => {
-    const timestamp = serverTimestamp();
+    const timestamp = new Date();
     const docRef = await addDoc(collection(db, 'challenges'), {
       ...newChallenge,
       createdAt: timestamp,
-      updatedAt: timestamp,
       deletedAt: null,
       user: {
         id: user.uid,
@@ -68,8 +89,7 @@ const Dashboard = () => {
       {
         id: docRef.id,
         ...newChallenge,
-        createdAt: timestamp.toDate(),
-        updatedAt: timestamp.toDate(),
+        createdAt: timestamp,
         deletedAt: null,
         user: {
           id: user.uid,
@@ -78,6 +98,14 @@ const Dashboard = () => {
         },
       },
     ]);
+  };
+
+  const handleRemoveChallenge = async (challengeId) => {
+    const challengeRef = doc(db, 'challenges', challengeId);
+    await deleteDoc(challengeRef);
+    setChallenges((prev) =>
+      prev.filter((challenge) => challenge.id !== challengeId)
+    );
   };
 
   return (
@@ -108,21 +136,12 @@ const Dashboard = () => {
       </AppBar>
       <Toolbar /> {/* This is to offset the content below the AppBar */}
       <Container maxWidth="lg" style={{ marginTop: '20px' }}>
-        <Box
-          display="flex"
-          height="80vh"
-          width="100%"
-          flexDirection="row"
-          flexWrap="wrap"
-          gap={'16px'}
-        >
-          <CreateChallengeCard onCreate={handleCreateChallenge} />
+        <Box display="flex" width="100%" flexDirection="row" flexWrap="wrap">
           {challenges.map((challenge) => (
             <ChallengeCard
               key={challenge.id}
+              id={challenge.id}
               title={challenge.name}
-              start={challenge.start}
-              end={challenge.end}
               distance={challenge.distance}
               walkedDistance={challenge.walkedDistance}
               createdAt={
@@ -130,16 +149,16 @@ const Dashboard = () => {
                   ? challenge.createdAt.toDate()
                   : challenge.createdAt
               }
-              updatedAt={
-                challenge.updatedAt.toDate
-                  ? challenge.updatedAt.toDate()
-                  : challenge.updatedAt
-              }
               user={challenge.user}
+              logs={challenge.logs}
+              onRemove={handleRemoveChallenge}
+              currentUser={user}
+              distancePreference={distancePreference}
             />
           ))}
         </Box>
       </Container>
+      <CreateChallengeCard onCreate={handleCreateChallenge} />
     </>
   );
 };

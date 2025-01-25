@@ -11,6 +11,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import PrivateRoute from './components/PrivateRoute';
+import Challenge from './pages/Challenge';
+import LoadingScreen from './components/LoadingScreen';
 import './App.css';
 
 const darkTheme = createTheme({
@@ -20,7 +22,11 @@ const darkTheme = createTheme({
 });
 
 function App() {
-  const [user] = useAuthState(auth);
+  const [user, loading] = useAuthState(auth);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -48,6 +54,14 @@ function App() {
             element={
               <PrivateRoute>
                 <Profile />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/challenge/:id"
+            element={
+              <PrivateRoute>
+                <Challenge />
               </PrivateRoute>
             }
           />

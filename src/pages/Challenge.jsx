@@ -1,0 +1,212 @@
+import {
+  Avatar,
+  Box,
+  Container,
+  LinearProgress,
+  Tooltip,
+  Typography,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import { format } from 'date-fns';
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+  arrayRemove,
+} from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import CreateLogsCard from '../components/CreateLogsCard';
+import LogCard from '../components/LogCard';
+import { KM_TO_M } from '../constants';
+import { db } from '../services/firebase';
+import LoadingScreen from '../components/LoadingScreen';
+
+const Challenge = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [challenge, setChallenge] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [sortOption, setSortOption] = useState('createdAt');
+  const [sortOrder, setSortOrder] = useState('asc');
+
+  useEffect(() => {
+    const fetchChallenge = async () => {
+      const docRef = doc(db, 'challenges', id);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setChallenge({ id: docSnap.id, ...docSnap.data() });
+      }
+      setLoading(false);
+    };
+
+    fetchChallenge();
+  }, [id]);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  if (!challenge) {
+    return (
+      <Container>
+        <Typography variant="h4" component="div" gutterBottom>
+          Challenge Not Found
+        </Typography>
+        <Button variant="contained" onClick={() => navigate('/dashboard')}>
+          Back to Dashboard
+        </Button>
+      </Container>
+    );
+  }
+
+  const walkedDistance =
+    challenge.logs?.reduce((sum, log) => sum + Number(log.distance), 0) || 0;
+  const progress = (walkedDistance / challenge.distance) * 100;
+  const leftDistance = (challenge.distance - walkedDistance) / KM_TO_M;
+
+  const handleCreateLog = async (newLog) => {
+    const timestamp = new Date();
+    const logWithTimestamp = {
+      ...newLog,
+      createdAt: timestamp,
+      id: `${timestamp.getTime()}-${Math.random()}`, // Ensure unique key
+    };
+    const challengeRef = doc(db, 'challenges', id);
+    await updateDoc(challengeRef, {
+      logs: arrayUnion(logWithTimestamp),
+    });
+    setChallenge((prev) => ({
+      ...prev,
+      logs: [...(prev.logs || []), logWithTimestamp],
+    }));
+  };
+
+  const handleRemoveLog = async (logId) => {
+    const logToRemove = challenge.logs.find((log) => log.id === logId);
+    const challengeRef = doc(db, 'challenges', id);
+    await updateDoc(challengeRef, {
+      logs: arrayRemove(logToRemove),
+    });
+    setChallenge((prev) => ({
+      ...prev,
+      logs: prev.logs.filter((log) => log.id !== logId),
+    }));
+  };
+
+  const handleSortChange = (event) => {
+    setSortOption(event.target.value);
+  };
+
+  const handleSortOrderChange = (event) => {
+    setSortOrder(event.target.value);
+  };
+
+  const sortedLogs = [...(challenge.logs || [])].sort((a, b) => {
+    let comparison = 0;
+    if (sortOption === 'createdAt') {
+      comparison = new Date(a.createdAt) - new Date(b.createdAt);
+    } else if (sortOption === 'distance') {
+      comparison = a.distance - b.distance;
+    } else if (sortOption === 'duration') {
+      comparison = a.duration - b.duration;
+    }
+    return sortOrder === 'asc' ? comparison : -comparison;
+  });
+
+  const totalMinutes =
+    challenge.logs?.reduce((sum, log) => sum + Number(log.duration), 0) || 0;
+
+  return (
+    <Container>
+      <Button variant="contained" onClick={() => navigate('/dashboard')}>
+        Back to Dashboard
+      </Button>
+      <Typography variant="h4" component="div" gutterBottom>
+        {challenge.name}
+      </Typography>
+      {challenge.user && (
+        <Tooltip title={challenge.user.name}>
+          <Avatar alt={challenge.user.name} src={challenge.user.picture} />
+        </Tooltip>
+      )}
+      <Typography variant="body2" color="text.secondary">
+        Distance: {challenge.distance} meters
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Walked: {walkedDistance} meters
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Left: {leftDistance} km
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        Created At: {format(new Date(challenge.createdAt.toDate()), 'PPpp')}
+      </Typography>
+      <Box display="flex" alignItems="center" sx={{ marginTop: '10px' }}>
+        {!!leftDistance ? (
+          <>
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              sx={{ flexGrow: 1, marginRight: '10px' }}
+            />
+            <Typography variant="body2" color="text.secondary">
+              {leftDistance.toFixed(2)} km left
+            </Typography>
+          </>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            Challenge completed in {totalMinutes} minutes
+          </Typography>
+        )}
+      </Box>
+
+      <Box display="flex" flexDirection="row" gap="16px" marginTop="20px">
+        <FormControl fullWidth>
+          <InputLabel>Sort Logs By</InputLabel>
+          <Select
+            value={sortOption}
+            onChange={handleSortChange}
+            label="Sort Logs By"
+          >
+            <MenuItem value="createdAt">Created At</MenuItem>
+            <MenuItem value="distance">Distance</MenuItem>
+            <MenuItem value="duration">Duration</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl fullWidth>
+          <InputLabel>Sort Order</InputLabel>
+          <Select
+            value={sortOrder}
+            onChange={handleSortOrderChange}
+            label="Sort Order"
+          >
+            <MenuItem value="asc">Ascending</MenuItem>
+            <MenuItem value="desc">Descending</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      <Box display="flex" flexDirection="row" gap="16px" marginTop="20px">
+        {sortedLogs.map((log) => (
+          <LogCard key={log.id} log={log} onRemove={handleRemoveLog} />
+        ))}
+      </Box>
+      {leftDistance > 0 && (
+        <CreateLogsCard
+          onCreate={handleCreateLog}
+          challengeDistance={challenge.distance}
+          walkedDistance={walkedDistance}
+        />
+      )}
+    </Container>
+  );
+};
+
+export default Challenge;

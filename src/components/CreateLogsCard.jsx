@@ -2,15 +2,14 @@ import React, { useState } from 'react';
 import { Fab, Modal, Box, TextField, Typography, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 
-const initialChallenge = {
-  name: '',
+const initialLog = {
   distance: '',
-  walkedDistance: 0,
+  duration: '',
 };
 
-const CreateChallengeCard = ({ onCreate }) => {
+const CreateLogsCard = ({ onCreate, challengeDistance, walkedDistance }) => {
   const [open, setOpen] = useState(false);
-  const [challenge, setChallenge] = useState(initialChallenge);
+  const [log, setLog] = useState(initialLog);
   const [errors, setErrors] = useState({});
 
   const handleOpen = () => setOpen(true);
@@ -21,14 +20,19 @@ const CreateChallengeCard = ({ onCreate }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setChallenge((prev) => ({ ...prev, [name]: value }));
+    setLog((prev) => ({ ...prev, [name]: value }));
   };
 
   const validate = () => {
     const newErrors = {};
-    if (!challenge.name) newErrors.name = 'Name is required';
-    if (!challenge.distance || challenge.distance <= 0)
+    const leftDistance = challengeDistance - walkedDistance;
+    if (!log.distance || log.distance <= 0)
       newErrors.distance = 'Distance must be a positive number';
+    if (log.distance > leftDistance)
+      newErrors.distance =
+        'Distance cannot be greater than remaining challenge distance';
+    if (!log.duration || log.duration <= 0)
+      newErrors.duration = 'Duration must be a positive number';
     return newErrors;
   };
 
@@ -37,8 +41,8 @@ const CreateChallengeCard = ({ onCreate }) => {
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
     } else {
-      onCreate(challenge);
-      setChallenge(initialChallenge);
+      onCreate(log);
+      setLog(initialLog);
       handleClose();
     }
   };
@@ -71,28 +75,29 @@ const CreateChallengeCard = ({ onCreate }) => {
           }}
         >
           <Typography variant="h6" gutterBottom>
-            Create New Challenge
+            Create New Log
           </Typography>
-          <TextField
-            label="Name"
-            name="name"
-            fullWidth
-            margin="normal"
-            value={challenge.name}
-            onChange={handleChange}
-            error={!!errors.name}
-            helperText={errors.name}
-          />
           <TextField
             label="Distance (meters)"
             name="distance"
             type="number"
             fullWidth
             margin="normal"
-            value={challenge.distance}
+            value={log.distance}
             onChange={handleChange}
             error={!!errors.distance}
             helperText={errors.distance}
+          />
+          <TextField
+            label="Duration (minutes)"
+            name="duration"
+            type="number"
+            fullWidth
+            margin="normal"
+            value={log.duration}
+            onChange={handleChange}
+            error={!!errors.duration}
+            helperText={errors.duration}
           />
           <Button
             variant="contained"
@@ -109,4 +114,4 @@ const CreateChallengeCard = ({ onCreate }) => {
   );
 };
 
-export default CreateChallengeCard;
+export default CreateLogsCard;
