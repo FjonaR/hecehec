@@ -1,4 +1,11 @@
-import { Card, CardContent, LinearProgress, Typography } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  LinearProgress,
+  Typography,
+  Avatar,
+  Tooltip,
+} from '@mui/material';
 import React from 'react';
 import { format } from 'date-fns';
 import { KM_TO_M } from '../constants';
@@ -11,13 +18,30 @@ const ChallengeCard = ({
   walkedDistance,
   createdAt,
   updatedAt,
+  user,
 }) => {
   const progress = (walkedDistance / distance) * 100;
   const leftDistance = (distance - walkedDistance) / KM_TO_M;
 
   return (
-    <Card style={{ margin: '20px', width: '400px', height: '250px' }}>
+    <Card
+      style={{
+        margin: '20px',
+        width: '400px',
+        height: '250px',
+        position: 'relative',
+      }}
+    >
       <CardContent>
+        {user && (
+          <Tooltip title={user.name}>
+            <Avatar
+              alt={user.name}
+              src={user.picture}
+              style={{ position: 'absolute', top: '10px', right: '10px' }}
+            />
+          </Tooltip>
+        )}
         <Typography variant="h5" component="div">
           {title}
         </Typography>

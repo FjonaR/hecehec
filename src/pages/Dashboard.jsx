@@ -57,15 +57,25 @@ const Dashboard = () => {
       createdAt: timestamp,
       updatedAt: timestamp,
       deletedAt: null,
+      user: {
+        id: user.uid,
+        name: user.displayName,
+        picture: user.photoURL,
+      },
     });
     setChallenges((prev) => [
       ...prev,
       {
         id: docRef.id,
         ...newChallenge,
-        createdAt: timestamp,
-        updatedAt: timestamp,
+        createdAt: timestamp.toDate(),
+        updatedAt: timestamp.toDate(),
         deletedAt: null,
+        user: {
+          id: user.uid,
+          name: user.displayName,
+          picture: user.photoURL,
+        },
       },
     ]);
   };
@@ -115,8 +125,17 @@ const Dashboard = () => {
               end={challenge.end}
               distance={challenge.distance}
               walkedDistance={challenge.walkedDistance}
-              createdAt={challenge.createdAt}
-              updatedAt={challenge.updatedAt}
+              createdAt={
+                challenge.createdAt.toDate
+                  ? challenge.createdAt.toDate()
+                  : challenge.createdAt
+              }
+              updatedAt={
+                challenge.updatedAt.toDate
+                  ? challenge.updatedAt.toDate()
+                  : challenge.updatedAt
+              }
+              user={challenge.user}
             />
           ))}
         </Box>
