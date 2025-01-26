@@ -1,7 +1,7 @@
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Route,
   Routes,
   Navigate,
@@ -31,7 +31,7 @@ function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Router basename="/hecehec">
+      <Router>
         <Routes>
           <Route
             path="/"
