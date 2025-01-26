@@ -1,27 +1,25 @@
-import React, { useState } from 'react';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth, db } from '../services/firebase.js';
 import {
   Container,
-  Typography,
-  Select,
-  MenuItem,
   FormControl,
   InputLabel,
+  MenuItem,
+  Select,
+  Typography,
 } from '@mui/material';
-import { doc, updateDoc } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../services/firebase.js';
 
 const Profile = () => {
   const [user] = useAuthState(auth);
-  const [distancePreference, setDistancePreference] = useState('meters');
+  const [distancePreference, setDistancePreference] = useState(
+    localStorage.getItem('distancePreference') ?? 'meters'
+  );
 
   const handleChange = async (event) => {
     const newPreference = event.target.value;
     setDistancePreference(newPreference);
-    const userRef = doc(db, 'users', user.uid);
-    await updateDoc(userRef, {
-      distancePreference: newPreference,
-    });
+    localStorage.setItem('distancePreference', newPreference);
   };
 
   return (

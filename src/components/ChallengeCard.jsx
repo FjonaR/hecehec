@@ -1,24 +1,24 @@
+import DeleteIcon from '@mui/icons-material/Delete';
 import {
+  Avatar,
+  Box,
+  Button,
   Card,
   CardContent,
-  LinearProgress,
-  Typography,
-  Avatar,
-  Tooltip,
-  Box,
-  IconButton,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Button,
+  IconButton,
+  LinearProgress,
+  Tooltip,
+  Typography,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { KM_TO_M } from '../constants';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { KM_TO_M } from '../constants';
 
 const ChallengeCard = ({
   id,

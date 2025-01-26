@@ -1,34 +1,32 @@
 import {
   Avatar,
   Box,
-  Container,
-  LinearProgress,
-  Tooltip,
-  Typography,
   Button,
+  Container,
   FormControl,
   InputLabel,
-  Select,
+  LinearProgress,
   MenuItem,
+  Select,
+  Tooltip,
+  Typography,
 } from '@mui/material';
 import { format } from 'date-fns';
 import {
+  arrayRemove,
   arrayUnion,
   doc,
   getDoc,
-  serverTimestamp,
   updateDoc,
-  arrayRemove,
 } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { useNavigate, useParams } from 'react-router-dom';
 import CreateLogsCard from '../components/CreateLogsCard';
+import LoadingScreen from '../components/LoadingScreen';
 import LogCard from '../components/LogCard';
 import { KM_TO_M } from '../constants';
-import { db } from '../services/firebase';
-import LoadingScreen from '../components/LoadingScreen';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { auth } from '../services/firebase';
+import { auth, db } from '../services/firebase';
 
 const Challenge = () => {
   const { id } = useParams();
@@ -38,6 +36,9 @@ const Challenge = () => {
   const [sortOption, setSortOption] = useState('createdAt');
   const [sortOrder, setSortOrder] = useState('asc');
   const [user] = useAuthState(auth);
+  const [distancePreference] = useState(
+    localStorage.getItem('distancePreference') ?? 'meters'
+  );
 
   useEffect(() => {
     const fetchChallenge = async () => {
@@ -126,6 +127,13 @@ const Challenge = () => {
   const totalMinutes =
     challenge.logs?.reduce((sum, log) => sum + Number(log.duration), 0) || 0;
 
+  const formatDistance = (distance) => {
+    if (distancePreference === 'km') {
+      return `${(distance / 1000).toFixed(2)} km`;
+    }
+    return `${distance} meters`;
+  };
+
   return (
     <Container maxWidth="lg" style={{ marginTop: '20px' }}>
       <Box display="flex" alignItems="center" gap="10px" marginBottom="10px">
@@ -140,10 +148,10 @@ const Challenge = () => {
         {leftDistance <= 0 && <Typography variant="h4">🎉</Typography>}
       </Box>
       <Typography variant="body2" color="text.secondary">
-        Distance: {challenge.distance} meters
+        Distance: {formatDistance(challenge.distance)}
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Walked: {walkedDistance} meters
+        Walked: {formatDistance(walkedDistance)}
       </Typography>
       <Typography variant="body2" color="text.secondary">
         Left: {leftDistance} km

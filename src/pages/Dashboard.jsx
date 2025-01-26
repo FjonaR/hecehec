@@ -1,13 +1,4 @@
-import LogoutIcon from '@mui/icons-material/Logout';
-import {
-  AppBar,
-  Avatar,
-  Box,
-  Button,
-  Container,
-  Toolbar,
-  Typography,
-} from '@mui/material';
+import { Box, Container } from '@mui/material';
 import {
   addDoc,
   collection,
@@ -18,16 +9,16 @@ import {
 } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useNavigate } from 'react-router-dom';
 import ChallengeCard from '../components/ChallengeCard';
 import CreateChallengeCard from '../components/CreateChallengeCard';
 import { auth, db } from '../services/firebase.js';
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
-  const navigate = useNavigate();
   const [challenges, setChallenges] = useState([]);
-  const [distancePreference, setDistancePreference] = useState('meters');
+  const [distancePreference, setDistancePreference] = useState(
+    localStorage.getItem('distancePreference') ?? 'meters'
+  );
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -63,14 +54,6 @@ const Dashboard = () => {
       fetchUserPreference();
     }
   }, [user]);
-
-  const handleLogout = () => {
-    auth.signOut();
-  };
-
-  const handleAvatarClick = () => {
-    navigate('/profile');
-  };
 
   const handleCreateChallenge = async (newChallenge) => {
     const timestamp = new Date();
