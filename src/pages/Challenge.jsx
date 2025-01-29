@@ -204,7 +204,13 @@ const Challenge = () => {
         </FormControl>
       </Box>
 
-      <Box display="flex" flexDirection="row" gap="16px" marginTop="20px">
+      <Box
+        display="flex"
+        flexDirection="row"
+        gap="16px"
+        marginTop="20px"
+        flexWrap="wrap"
+      >
         {sortedLogs.map((log) => (
           <LogCard
             key={log.id}
