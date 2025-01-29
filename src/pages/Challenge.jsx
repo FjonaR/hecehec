@@ -3,11 +3,7 @@ import {
   Box,
   Button,
   Container,
-  FormControl,
-  InputLabel,
   LinearProgress,
-  MenuItem,
-  Select,
   Tooltip,
   Typography,
 } from '@mui/material';
@@ -26,16 +22,14 @@ import LoadingScreen from '../components/LoadingScreen';
 import LogCard from '../components/LogCard';
 import { KM_TO_M } from '../constants';
 import { auth, db } from '../services/firebase';
-import { formatRelativeTime } from '../utils/time';
 import { formatDistance } from '../utils/distance';
+import { formatRelativeTime, getFirebaseDate } from '../utils/time';
 
 const Challenge = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [challenge, setChallenge] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sortOption, setSortOption] = useState('createdAt');
-  const [sortOrder, setSortOrder] = useState('asc');
   const [user] = useAuthState(auth);
   const [distancePreference] = useState(
     localStorage.getItem('distancePreference') ?? 'meters'
@@ -106,24 +100,8 @@ const Challenge = () => {
     }));
   };
 
-  const handleSortChange = (event) => {
-    setSortOption(event.target.value);
-  };
-
-  const handleSortOrderChange = (event) => {
-    setSortOrder(event.target.value);
-  };
-
   const sortedLogs = [...(challenge.logs || [])].sort((a, b) => {
-    let comparison = 0;
-    if (sortOption === 'createdAt') {
-      comparison = new Date(a.createdAt) - new Date(b.createdAt);
-    } else if (sortOption === 'distance') {
-      comparison = a.distance - b.distance;
-    } else if (sortOption === 'duration') {
-      comparison = a.duration - b.duration;
-    }
-    return sortOrder === 'asc' ? comparison : -comparison;
+    return getFirebaseDate(b.createdAt) - getFirebaseDate(a.createdAt);
   });
 
   const totalMinutes =
@@ -137,24 +115,26 @@ const Challenge = () => {
             <Avatar alt={challenge.user.name} src={challenge.user.picture} />
           </Tooltip>
         )}
-        <Typography variant="h4" component="div" gutterBottom>
-          {challenge.name}
-        </Typography>
+        <Box>
+          <Typography variant="h5" component="div">
+            {challenge.name}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Updated {formatRelativeTime(new Date(challenge.updatedAt.toDate()))}
+          </Typography>
+        </Box>
         {leftDistance <= 0 && <Typography variant="h4">🎉</Typography>}
       </Box>
       <Typography variant="body2" color="text.secondary">
-        Distance: {formatDistance(walkedDistance, distancePreference)} /{' '}
-        {formatDistance(challenge.distance, distancePreference)}
+        Walked {formatDistance(walkedDistance, distancePreference)}
       </Typography>
       <Typography variant="body2" color="text.secondary">
-        Left: {leftDistance} km
+        Left {leftDistance} km
       </Typography>
       {/* <Typography variant="body2" color="text.secondary">
         Created At: {formatRelativeTime(new Date(challenge.createdAt.toDate()))}
       </Typography> */}
-      <Typography variant="body2" color="text.secondary">
-        Updated At: {formatRelativeTime(new Date(challenge.updatedAt.toDate()))}
-      </Typography>
+
       <Box display="flex" alignItems="center" sx={{ marginTop: '10px' }}>
         {!!leftDistance ? (
           <>
@@ -174,37 +154,12 @@ const Challenge = () => {
         )}
       </Box>
 
-      <Box display="flex" flexDirection="row" gap="16px" marginTop="20px">
-        <FormControl fullWidth>
-          <InputLabel>Sort Logs By</InputLabel>
-          <Select
-            value={sortOption}
-            onChange={handleSortChange}
-            label="Sort Logs By"
-          >
-            <MenuItem value="createdAt">Created At</MenuItem>
-            <MenuItem value="distance">Distance</MenuItem>
-            <MenuItem value="duration">Duration</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl fullWidth>
-          <InputLabel>Sort Order</InputLabel>
-          <Select
-            value={sortOrder}
-            onChange={handleSortOrderChange}
-            label="Sort Order"
-          >
-            <MenuItem value="asc">Ascending</MenuItem>
-            <MenuItem value="desc">Descending</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
-
       <Box
         display="flex"
         flexDirection="row"
-        gap="16px"
+        gap="8px"
         marginTop="20px"
+        marginBottom="80px"
         flexWrap="wrap"
       >
         {sortedLogs.map((log) => (

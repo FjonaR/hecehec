@@ -71,7 +71,6 @@ const ChallengeCard = ({
     <>
       <Card
         style={{
-          margin: '20px',
           width: '100%',
           position: 'relative',
           cursor: 'pointer',

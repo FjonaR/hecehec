@@ -39,6 +39,10 @@ const Dashboard = () => {
           deletedAt: data.deletedAt?.toDate(),
         };
       });
+
+      // Sort challenges by last updated timestamp
+      challengesData.sort((a, b) => b.updatedAt - a.updatedAt);
+
       setChallenges(challengesData);
       fetchTopUsers(challengesData);
     };
@@ -114,7 +118,15 @@ const Dashboard = () => {
     <>
       <Container maxWidth="lg" style={{ marginTop: '20px' }}>
         <Podium topUsers={topUsers} />
-        <Box display="flex" width="100%" flexDirection="row" flexWrap="wrap">
+        <Box
+          display="flex"
+          width="100%"
+          flexDirection="row"
+          flexWrap="wrap"
+          gap={'16px'}
+          marginTop={'24px'}
+          marginBottom={'80px'}
+        >
           {challenges.map((challenge) => (
             <ChallengeCard
               key={challenge.id}
