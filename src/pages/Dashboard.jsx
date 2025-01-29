@@ -4,21 +4,23 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDoc,
   getDocs,
 } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import ChallengeCard from '../components/ChallengeCard';
-import CreateChallengeCard from '../components/CreateChallengeCard';
+import CreateCustomChallengeCard from '../components/CreateChallengeCard.jsx';
+import Podium from '../components/Podium';
 import { auth, db } from '../services/firebase.js';
+import { useDistancePreference } from '../states/distancePreference.jsx';
+import { formatDistance } from '../utils/distance';
+import { getFirebaseDate } from '../utils/time.js';
 
 const Dashboard = () => {
   const [user] = useAuthState(auth);
   const [challenges, setChallenges] = useState([]);
-  const [distancePreference, setDistancePreference] = useState(
-    localStorage.getItem('distancePreference') ?? 'meters'
-  );
+  const [topUsers, setTopUsers] = useState([]);
+  const [distancePreference] = useDistancePreference();
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -32,34 +34,50 @@ const Dashboard = () => {
           ...data,
           walkedDistance,
           createdAt: data.createdAt.toDate(),
+          startedAt: data.startedAt?.toDate(),
+          endedAt: data.endedAt?.toDate(),
           deletedAt: data.deletedAt?.toDate(),
         };
       });
       setChallenges(challengesData);
+      fetchTopUsers(challengesData);
+    };
+
+    const fetchTopUsers = (challengesData) => {
+      const userSteps = {};
+
+      challengesData.forEach((challenge) => {
+        challenge.logs?.forEach((log) => {
+          const userId = challenge.user.id;
+          if (!userSteps[userId]) {
+            userSteps[userId] = {
+              name: challenge?.user?.name.split(' ')[0] || 'Unknown',
+              picture: challenge.user?.picture || '',
+              score: 0,
+            };
+          }
+          userSteps[userId].score += Number(log.distance);
+        });
+      });
+
+      const sortedUsers = Object.values(userSteps)
+        .sort((a, b) => b.score - a.score)
+        .map((user) => ({
+          ...user,
+          score: formatDistance(user.score, distancePreference),
+        }));
+      setTopUsers(sortedUsers.slice(0, 3));
     };
 
     fetchChallenges();
   }, []);
-
-  useEffect(() => {
-    const fetchUserPreference = async () => {
-      const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists()) {
-        setDistancePreference(userSnap.data().distancePreference || 'meters');
-      }
-    };
-
-    if (user) {
-      fetchUserPreference();
-    }
-  }, [user]);
 
   const handleCreateChallenge = async (newChallenge) => {
     const timestamp = new Date();
     const docRef = await addDoc(collection(db, 'challenges'), {
       ...newChallenge,
       createdAt: timestamp,
+      updatedAt: timestamp,
       deletedAt: null,
       user: {
         id: user.uid,
@@ -73,6 +91,7 @@ const Dashboard = () => {
         id: docRef.id,
         ...newChallenge,
         createdAt: timestamp,
+        updatedAt: timestamp,
         deletedAt: null,
         user: {
           id: user.uid,
@@ -94,6 +113,7 @@ const Dashboard = () => {
   return (
     <>
       <Container maxWidth="lg" style={{ marginTop: '20px' }}>
+        <Podium topUsers={topUsers} />
         <Box display="flex" width="100%" flexDirection="row" flexWrap="wrap">
           {challenges.map((challenge) => (
             <ChallengeCard
@@ -102,11 +122,10 @@ const Dashboard = () => {
               title={challenge.name}
               distance={challenge.distance}
               walkedDistance={challenge.walkedDistance}
-              createdAt={
-                challenge.createdAt.toDate
-                  ? challenge.createdAt.toDate()
-                  : challenge.createdAt
-              }
+              createdAt={getFirebaseDate(challenge.createdAt)}
+              updatedAt={getFirebaseDate(challenge.updatedAt)}
+              startedAt={getFirebaseDate(challenge.startedAt)}
+              endedAt={getFirebaseDate(challenge.endedAt)}
               user={challenge.user}
               logs={challenge.logs}
               onRemove={handleRemoveChallenge}
@@ -116,7 +135,7 @@ const Dashboard = () => {
           ))}
         </Box>
       </Container>
-      <CreateChallengeCard onCreate={handleCreateChallenge} />
+      <CreateCustomChallengeCard onCreate={handleCreateChallenge} />
     </>
   );
 };

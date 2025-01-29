@@ -6,6 +6,8 @@ const initialChallenge = {
   name: '',
   distance: '',
   walkedDistance: 0,
+  startedAt: '',
+  endDate: '',
 };
 
 const CreateChallengeCard = ({ onCreate }) => {
@@ -29,6 +31,8 @@ const CreateChallengeCard = ({ onCreate }) => {
     if (!challenge.name) newErrors.name = 'Name is required';
     if (!challenge.distance || challenge.distance <= 0)
       newErrors.distance = 'Distance must be a positive number';
+    if (!challenge.startedAt) newErrors.startedAt = 'Start date is required';
+    if (!challenge.endDate) newErrors.endDate = 'End date is required';
     return newErrors;
   };
 
@@ -93,6 +97,34 @@ const CreateChallengeCard = ({ onCreate }) => {
             onChange={handleChange}
             error={!!errors.distance}
             helperText={errors.distance}
+          />
+          <TextField
+            label="Start Date"
+            name="startedAt"
+            type="date"
+            fullWidth
+            margin="normal"
+            value={challenge.startedAt}
+            onChange={handleChange}
+            error={!!errors.startedAt}
+            helperText={errors.startedAt}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+          <TextField
+            label="End Date"
+            name="endDate"
+            type="date"
+            fullWidth
+            margin="normal"
+            value={challenge.endDate}
+            onChange={handleChange}
+            error={!!errors.endDate}
+            helperText={errors.endDate}
+            InputLabelProps={{
+              shrink: true,
+            }}
           />
           <Button
             variant="contained"

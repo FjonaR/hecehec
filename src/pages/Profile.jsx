@@ -9,17 +9,15 @@ import {
 import React, { useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '../services/firebase.js';
+import { useDistancePreference } from '../states/distancePreference.jsx';
 
 const Profile = () => {
   const [user] = useAuthState(auth);
-  const [distancePreference, setDistancePreference] = useState(
-    localStorage.getItem('distancePreference') ?? 'meters'
-  );
+  const [distancePreference, setDistancePreference] = useDistancePreference();
 
   const handleChange = async (event) => {
     const newPreference = event.target.value;
     setDistancePreference(newPreference);
-    localStorage.setItem('distancePreference', newPreference);
   };
 
   return (

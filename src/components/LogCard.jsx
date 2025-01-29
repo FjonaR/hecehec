@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, IconButton } from '@mui/material';
-import { format } from 'date-fns';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { formatRelativeTime } from '../utils/time';
 
 const LogCard = ({ log, onRemove }) => {
   const speed = (log.distance / log.duration).toFixed(2);
@@ -27,12 +27,10 @@ const LogCard = ({ log, onRemove }) => {
           Speed: {speed} meters/minute
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Created At:{' '}
-          {format(
+          {formatRelativeTime(
             new Date(
               log.createdAt.toDate ? log.createdAt.toDate() : log.createdAt
-            ),
-            'PPpp'
+            )
           )}
         </Typography>
       </CardContent>

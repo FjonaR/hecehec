@@ -15,7 +15,7 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { format } from 'date-fns';
+import { formatRelativeTime } from '../utils/time';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { KM_TO_M } from '../constants';
@@ -26,6 +26,9 @@ const ChallengeCard = ({
   distance,
   walkedDistance,
   createdAt,
+  updatedAt,
+  startedAt,
+  endedAt,
   user,
   onRemove,
   currentUser,
@@ -94,14 +97,14 @@ const ChallengeCard = ({
                   <Avatar alt={user.name} src={user.picture} />
                 </Tooltip>
               )}
-              <Typography variant="h5" component="div">
-                {title}
-              </Typography>
-              {leftDistance <= 0 ? (
-                <Typography variant="h4">🎉</Typography>
-              ) : (
-                <Typography variant="h4">🚶</Typography>
-              )}
+              <Box>
+                <Typography variant="h5" component="div">
+                  {title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Ending {formatRelativeTime(new Date(endedAt))}
+                </Typography>
+              </Box>
             </Box>
             <Box
               sx={{
@@ -118,16 +121,19 @@ const ChallengeCard = ({
             </Box>
           </Box>
           <Typography variant="body2" color="text.secondary">
-            Distance: {formatDistance(distance)}
+            Walked {formatDistance(walkedDistance)}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Walked: {formatDistance(walkedDistance)}
+            Left {formatDistance(leftDistance * KM_TO_M)}
+          </Typography>
+          {/* <Typography variant="body2" color="text.secondary">
+            Created {formatRelativeTime(new Date(createdAt))}
+          </Typography> */}
+          <Typography variant="body2" color="text.secondary">
+            Started {formatRelativeTime(new Date(startedAt))}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Left: {formatDistance(leftDistance * KM_TO_M)}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Created At: {format(new Date(createdAt), 'PPpp')}
+            Updated {formatRelativeTime(new Date(updatedAt))}
           </Typography>
           <Box display="flex" alignItems="center" sx={{ marginTop: '10px' }}>
             {!!leftDistance ? (
