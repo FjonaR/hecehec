@@ -10,6 +10,7 @@ import React from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import googleIcon from '../assets/google.svg'; // Import the Google icon
 import { auth, googleProvider } from '../services/firebase.js';
+import WalkingGif from '../components/WalkingGif'; // Import the WalkingGif component
 
 const Login = () => {
   const [loading] = useAuthState(auth);
@@ -35,11 +36,7 @@ const Login = () => {
         </Box>
       ) : (
         <>
-          <img
-            src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExNTFpZzBmMDV5Mzg0YWJob2Ewb3YzYXN4eDdkcXgwazV3MjlpdWh3biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/hkTXRkfarShjLBQH0v/giphy.gif"
-            alt="hec e hec"
-            style={{ width: '100px', heigh: '100px', marginBottom: '20px' }}
-          />
+          <WalkingGif />
           <Typography variant="h4" gutterBottom>
             hec e hec
           </Typography>

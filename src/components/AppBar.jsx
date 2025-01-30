@@ -10,6 +10,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../services/firebase.js';
+import WalkingGif from './WalkingGif';
 
 const AppBar = ({ children }) => {
   const [user] = useAuthState(auth);
@@ -31,6 +32,7 @@ const AppBar = ({ children }) => {
     <>
       <MuiAppBar position="fixed">
         <Toolbar>
+          <WalkingGif width="32px" height="32px" />
           <Typography
             variant="h6"
             style={{ flexGrow: 1, cursor: 'pointer' }}
